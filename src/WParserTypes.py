@@ -218,7 +218,7 @@ class Statement(Parsable):
         if tokens[0] == "while":
             return StatementWhileDoOd(tokens)
         
-        if tokens[1] == ":=":
+        if len(tokens) >= 2 and tokens[1] == ":=":
             return StatementAssignment(tokens)
         
         if tokens[0] == "skip":

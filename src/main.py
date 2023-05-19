@@ -1,5 +1,5 @@
 
-from Parser import Parser
+from WParser import WParser
 
 code = """
 skip;
@@ -14,6 +14,6 @@ fi;
 b := a
 """
 
-ast = Parser({"simplify": True}).parse(code)
+ast = WParser({"simplify": False}).parse(code)
 
 print(ast)

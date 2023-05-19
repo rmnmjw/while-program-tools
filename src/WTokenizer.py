@@ -1,4 +1,4 @@
-class Tokenizer():
+class WTokenizer():
     KEYWORDS = ["if", "while", "fi", "do", "then", "else", ":=", ">", ";", "od", "+", "-", "*", "=", "!", "^", "v"]
     
     def __init__(self):

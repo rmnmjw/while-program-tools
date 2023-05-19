@@ -1,4 +1,4 @@
-class Simplifier:
+class WSimplifier:
     
     def simplify(self, el):
         className = el.__class__.__name__

@@ -1,8 +1,8 @@
-from Tokenizer import Tokenizer
-from Simplifier import Simplifier
-from types import Statement
+from WTokenizer import WTokenizer
+from WSimplifier import WSimplifier
+from WParserTypes import Statement
 
-class Parser:
+class WParser:
     
     simplify = True
     
@@ -13,9 +13,9 @@ class Parser:
     
     def parse(self, code):
         
-        tokens = Tokenizer().tokenize(code)
+        tokens = WTokenizer().tokenize(code)
         ast = Statement(tokens)
         if self.simplify:
-            ast = Simplifier().simplify(ast)
+            ast = WSimplifier().simplify(ast)
         
         return ast

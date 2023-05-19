@@ -12,14 +12,6 @@ class Parsable:
         self.tokens = tokens
         self.set_name(name)
     
-    # def indent(self):
-    #     el = self
-    #     for i in range(1000):
-    #         if not el.parent:
-    #             return i
-    #         el = el.parent
-    #     return 0
-    
     def indent(self):
         el = self
         for i in range(1000):
@@ -44,8 +36,8 @@ class Parsable:
     
     def set_children(self, elements):
         self.children = []
-        for el in elements:
-            el.set_function('substatement')
+        for i, el in enumerate(elements):
+            el.set_function('substatement_' + str(i))
             el.set_parent(self)
             self.children.append(el)
     
@@ -94,8 +86,6 @@ class Parsable:
                 result += "\n" + str(s)
         return result
 
-
-
 class TruthValue(Parsable):
     pass
 
@@ -107,20 +97,12 @@ class Variable(Parsable):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tVariable name: {self.tokens[0]}")
-
 class Number(Parsable):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tVALUE: {self.tokens[0]}")
-
 class ExpressionArithmeticSubstraction(Parsable):
     
     def __init__(self, tokens):
@@ -129,11 +111,6 @@ class ExpressionArithmeticSubstraction(Parsable):
         [minuend, subtrahend] = self.parse(tokens)
         self.set_child('minuend', minuend)
         self.set_child('subtrahend', subtrahend)
-    
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tMinuend:\n{self.get_child('minuend')}"
-    #         + f"\n{self.indent()}\tSubtrahend:\n{self.get_child('subtrahend')}")
     
     def parse(self, tokens):
         if len(tokens) == 3 and tokens[1] == '-':
@@ -148,11 +125,6 @@ class ExpressionArithmetic(Parsable):
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
         self.set_child('expression', self.parse(tokens))
-    
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tExpression:"
-    #         + f"\n{self.get_child('expression')}")
     
     def is_number(self, value):
         for char in str(value):
@@ -199,13 +171,6 @@ class ExpressionBooleanGreaterThan(Parsable):
         self.set_child('left', left)
         self.set_child('right', right)
     
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tleft hand side:"
-    #         + f"\n{self.get_child('left')}"
-    #         + f"\n{self.indent()}\tright hand side:"
-    #         + f"\n{self.get_child('right')}")
-    
     def parse(self, tokens):
         if len(tokens) == 3 and tokens[1] == '>':
             left = ExpressionArithmetic(tokens[0])
@@ -220,11 +185,6 @@ class ExpressionBoolean(Parsable):
         super().__init__(tokens, self.__class__.__name__)
         self.set_child('expression', self.parse(tokens))
     
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\texpression:"
-    #         + f"\n{self.get_child('expression')}")
-    
     def parse(self, tokens):
         if len(tokens) == 3 and tokens[1] == ">":
             return ExpressionBooleanGreaterThan(tokens)
@@ -235,12 +195,7 @@ class Statement(Parsable):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
-        
         self.set_child('substatement', self.parse(tokens))
-        # el = self.parse(tokens)
-        # el.set_parent(self)
-        # self.children = [('substatement', el)]
-        # self.substatement = self.parse(tokens)
     
     def parse(self, tokens):
         # sequential
@@ -270,26 +225,14 @@ class Statement(Parsable):
             return StatementSkip(tokens)
         
         return " - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]"
-    
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tsubstatement:\n" + str(self.get_child('substatement')))
 
 class StatementAssignment(Parsable):
-    
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
         [assignee, assigner] = self.parse(tokens)
         self.set_child('assignee', assignee)
         self.set_child('assigner', assigner)
-    
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tASSIGNEE:"
-    #         + f"\n{self.get_child('assignee')}"
-    #         + f"\n{self.indent()}\tASSIGNER:"
-    #         + f"\n{self.get_child('assigner')}")
     
     def parse(self, tokens):
         if tokens[1] != ":=":
@@ -307,16 +250,6 @@ class StatementIfThenElseFi(Parsable):
         self.set_child('condition', condition)
         self.set_child('statementTrue', statementTrue)
         self.set_child('statementFalse', statementFalse)
-    
-    # def __repr__(self):
-    #     return (self.indent() + f"<<{self.name}>>"
-    #         + f"\n{self.indent()}\tIF CONDITION:"
-    #         + f"\n{self.get_child('condition')}"
-    #         + f"\n{self.indent()}\tTHEN STATEMENT:"
-    #         + f"\n{self.get_child('statementTrue')}"
-    #         + f"\n{self.indent()}\tELSE STATEMENT:"
-    #         + f"\n{self.get_child('statementFalse')}")
-        
     
     def parse(self, tokens):
         EXTENSION = len(tokens)
@@ -381,17 +314,9 @@ class StatementIfThenElseFi(Parsable):
 
 class StatementSequential(Parsable):
     
-    
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
         self.set_children(self.parse(tokens))
-    
-    # def __repr__(self):
-    #     result = (self.indent() + f"<<{self.name}>>"
-    #         + "\n" + self.indent() + f"\tsubstatements ({len(self.get_children())}):")
-    #     for i, s in self.get_children():
-    #         result += "\n" + str(s)
-    #     return result
     
     def parse(self, tokens):
         depth = 0
@@ -421,14 +346,6 @@ class StatementWhileDoOd(Parsable):
         [condition, body] = self.parse(tokens)
         self.set_child('condition', ExpressionBoolean(condition))
         self.set_child('body', Statement(body))
-    
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>"
-    #         + f"\n{self.indent()}\tCondition:"
-    #         + f"\n{self.get_child('condition')}"
-    #         + f"\n{self.indent()}\tBody:"
-    #         + f"\n{self.get_child('body')}"
-    #         )
     
     def parse(self, tokens):
         # codition part
@@ -461,6 +378,3 @@ class StatementSkip(Parsable):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
-    
-    # def __repr__(self):
-    #     return (f"{self.indent()}<<{self.name}>>")

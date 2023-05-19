@@ -19,24 +19,30 @@ SIMPLIFY = [
     , 'ExpressionBoolean'
 ]
 
-class WSimplifier:
+class WNormalizer:
     
-    def simplify(self, el):
+    def remove_shadows(self, el):
         className = el.__class__.__name__
         
         if className in JUST_CONTINUE:
             for c in el.get_children():
-                el.set_child(c.get_function(), self.simplify(c))
+                el.set_child(c.get_function(), self.remove_shadows(c))
             return el
         
         if className in SIMPLIFY:
             if len(el.get_children()) == 1:
                 child = el.get_children()[0]
                 child.set_parent(el.get_parent())
-                return self.simplify(child)
+                return self.remove_shadows(child)
         
         if className in IGNORE:
             return el
             
-        raise Exception(f'[Simplifier.simplify()] Unhandled class: "{className}"')
-
+        raise Exception(f'[WNormalizer.simplify()] Unhandled class: "{className}"')
+    
+    def pack_multi_sequentials(self, el):
+        return el # TODO: implement me
+    
+    def normalize(self, el):
+        el = self.remove_shadows(el)
+        return el

@@ -1,21 +1,21 @@
 from WTokenizer import WTokenizer
-from WSimplifier import WSimplifier
+from WNormalizer import WNormalizer
 from WParserTypes import Statement
 
 class WParser:
     
-    simplify = True
+    normalize = True
     
     def __init__(self, options={}):
-        if "simplify" in options:
-            self.simplify = options.get("simplify")
+        if "normalize" in options:
+            self.normalize = options.get("normalize")
         pass
     
     def parse(self, code):
         
         tokens = WTokenizer().tokenize(code)
         ast = Statement(tokens)
-        if self.simplify:
-            ast = WSimplifier().simplify(ast)
+        if self.normalize:
+            ast = WNormalizer().normalize(ast)
         
         return ast

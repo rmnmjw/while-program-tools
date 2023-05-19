@@ -14,6 +14,6 @@ fi;
 b := a
 """
 
-ast = WParser({"simplify": False}).parse(code)
+ast = WParser({"simplify": True}).parse(code)
 
 print(ast)

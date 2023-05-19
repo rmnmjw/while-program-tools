@@ -40,9 +40,6 @@ class WNormalizer:
             
         raise Exception(f'[WNormalizer.simplify()] Unhandled class: "{className}"')
     
-    def pack_multi_sequentials(self, el):
-        return el # TODO: implement me
-    
     def normalize(self, el):
         el = self.remove_shadows(el)
         return el

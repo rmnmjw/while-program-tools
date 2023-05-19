@@ -3,6 +3,7 @@ from WParser import WParser
 
 code = """
 skip;
+x := 0;
 if b > a then
     x := 0
 else

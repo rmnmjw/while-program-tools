@@ -1,3 +1,4 @@
+import math
 
 class Parsable:
         
@@ -328,6 +329,7 @@ class StatementSequential(Parsable):
             if token in ['od', 'fi']:
                 depth -= 1
             if depth == 0 and token == ';':
+                current.append(token)
                 parts.append(current)
                 current = []
                 continue
@@ -335,8 +337,34 @@ class StatementSequential(Parsable):
         if len(current) != 0:
             parts.append(current)
         
-        parts = [Statement(p) for p in parts]
+        if len(parts) == 1:
+            parts = [Statement(p[0])]
+            return parts
+        else:
+            left = parts[0:math.floor(len(parts)/2)] 
+            left = [token for upper in left for token in upper]
+            right = parts[math.floor(len(parts)/2):]
+            right = [token for upper in right for token in upper]
+            
+            if left[-1] == ";":
+                left = left[:-1]
+            if left[0] == ";":
+                left = left[1:]
+            if right[-1] == ";":
+                right = right[:-1]
+            if right[0] == ";":
+                right = right[1:]
+            
+            statement_left = Statement(left)
+            statement_right = Statement(right)
+            parts = [statement_left, statement_right]
+        
         return parts
+    
+   
+        
+        
+        
 
 class StatementWhileDoOd(Parsable):
     

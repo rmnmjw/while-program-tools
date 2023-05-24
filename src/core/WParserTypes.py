@@ -2,6 +2,12 @@ import math
 
 from WParserBaseType import WParserBaseType
 
+def is_number(value):
+    for char in str(value):
+        if char not in ["0","1","2","3","4","5","6","7","8","9"]:
+            return False
+    return True
+
 class Statement(WParserBaseType):
     
     def __init__(self, tokens):
@@ -46,17 +52,19 @@ class Statement(WParserBaseType):
         
         # check if given tokens are an arithmetic expression
         is_arithmetic = True
-        toggle = False # True => Variable or Sign; False => Number
         for token in tokens:
-            toggle ^= True
-            if toggle:
-                if token in ['+', '(', ')']:
-                    is_arithmetic = False
-                    break
-            else:
-                if token not in ['+', '(', ')']:
-                    is_arithmetic = False
-                    break
+            if token in ['skip', 'if', 'while', 'fi', 'do', 'then', 'else', ':=', '>', ';', 'od', '=', '¬', '∧', '∨']:
+                is_arithmetic = False
+                break
+        if is_arithmetic:
+            return ExpressionArithmetic(tokens)
+        
+        # check if given tokens are an boolean expression
+        is_arithmetic = True
+        for token in tokens:
+            if token in ['skip', 'if', 'while', 'fi', 'do', 'then', 'else', ':=', ';', 'od']:
+                is_arithmetic = False
+                break
         if is_arithmetic:
             return ExpressionArithmetic(tokens)
         
@@ -119,26 +127,23 @@ class ExpressionArithmetic(WParserBaseType):
         super().__init__(tokens, self.__class__.__name__)
         self.set_child('expression', self.parse(tokens))
     
-    def is_number(self, value):
-        for char in str(value):
-            if char not in ["0","1","2","3","4","5","6","7","8","9"]:
-                return False
-        return True
-    
     def parse_single_token(self, tokens):
         t = tokens[0]
-        if self.is_number(t):
+        if is_number(t):
             tokens_integer = [int(t)]
             return Number(tokens_integer)
         else:
             tokens_variable = [t]
             return Variable(tokens_variable)
     
+    # FIXME: make this completely dynamic
     def parse_single_assignment(self, tokens):
         if len(tokens) == 3 and tokens[1] == '-':
             return ExpressionArithmeticSubstraction(tokens)
         if len(tokens) == 3 and tokens[1] == '+':
             return ExpressionArithmeticAddition(tokens)
+        if len(tokens) == 3 and tokens[1] == '>':
+            return ExpressionBooleanGreaterThan(tokens)
         raise Exception(f"NOT IMPLEMENTED YET {tokens}")
     
     def parse(self, tokens):

@@ -52,3 +52,8 @@ class WState:
     
     def eval_internal_Variable(self, ast):
         return self.get(ast.get_value())
+    
+    def eval_internal_ExpressionBooleanGreaterThan(self, ast):
+        left = self.eval_internal(ast.get_child('left'))
+        right = self.eval_internal(ast.get_child('right'))
+        return left > right

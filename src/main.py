@@ -24,12 +24,11 @@ s = WState(output=-1, a=3, b=1, i=0)
 
 
 
-
-ast = WParser().parse("b > a")
+ast = WParser().parse("(i + 1) < a")
 
 value = s.eval(ast)
 print('value', value, flush=True, end='\n')
-print('ast', ast, flush=True, end='\n')
+# print('ast', ast, flush=True, end='\n')
 exit()
 
 

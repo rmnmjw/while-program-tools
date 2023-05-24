@@ -1,6 +1,7 @@
 import math
 
 from WParserBaseType import WParserBaseType
+from WTokenizer import KEYWORDS
 
 def is_number(value):
     for char in str(value):
@@ -53,20 +54,20 @@ class Statement(WParserBaseType):
         # check if given tokens are an arithmetic expression
         is_arithmetic = True
         for token in tokens:
-            if token in ['skip', 'if', 'while', 'fi', 'do', 'then', 'else', ':=', '>', ';', 'od', '=', '¬', '∧', '∨']:
+            if token in ['skip', 'if', 'while', 'fi', 'do', 'then', 'else', ':=', '>', '<', ';', 'od', '=', '¬', '∧', '∨']:
                 is_arithmetic = False
                 break
         if is_arithmetic:
             return ExpressionArithmetic(tokens)
         
         # check if given tokens are an boolean expression
-        is_arithmetic = True
+        is_boolean = True
         for token in tokens:
             if token in ['skip', 'if', 'while', 'fi', 'do', 'then', 'else', ':=', ';', 'od']:
-                is_arithmetic = False
+                is_boolean = False
                 break
-        if is_arithmetic:
-            return ExpressionArithmetic(tokens)
+        if is_boolean:
+            return ExpressionBoolean(tokens)
         
         raise Exception(" - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]")
 
@@ -144,6 +145,10 @@ class ExpressionArithmetic(WParserBaseType):
             return ExpressionArithmeticAddition(tokens)
         if len(tokens) == 3 and tokens[1] == '>':
             return ExpressionBooleanGreaterThan(tokens)
+        # if len(tokens) == 7:
+        #     if tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-'] and tokens[3] not in KEYWORDS and tokens[4] == ')' and tokens[5] in ['<', '>', '='] and tokens[6] not in KEYWORDS:
+        #         return 
+        # exit()
         raise Exception(f"NOT IMPLEMENTED YET {tokens}")
     
     def parse(self, tokens):

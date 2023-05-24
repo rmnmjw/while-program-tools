@@ -1,5 +1,6 @@
+KEYWORDS = ["skip", "if", "while", "fi", "do", "then", "else", ":=", ">", ";", "od", "+", "-", "*", "=", "¬", "∧", "∨", "(", ")"]
+
 class WTokenizer():
-    KEYWORDS = ["skip", "if", "while", "fi", "do", "then", "else", ":=", ">", ";", "od", "+", "-", "*", "=", "¬", "∧", "∨", "(", ")"]
     
     def __init__(self):
         pass
@@ -26,7 +27,7 @@ class WTokenizer():
                 break
             
             cont = False
-            for keyword in self.KEYWORDS:
+            for keyword in KEYWORDS:
                 if "".join(code[i:i+len(keyword)]) == keyword:
                     tokens.append(keyword)
                     i += len(keyword) - 1

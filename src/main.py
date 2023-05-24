@@ -20,9 +20,15 @@ from WAst import WAst
 # """
 
 # ast = WParser().parse(code)
+s = WState(output=-1, a=3, b=1, i=0)
 
-ast = WParser().parse("1 + 1")
-print('ast', ast, flush=True, end='\n')
+
+
+
+ast = WParser().parse("99999 + 99999")
+# print('ast', ast, flush=True, end='\n')
+val = s.eval(ast)
+print('val', val, flush=True, end='\n')
 exit()
 
 ast = WParser().parse("1 < 1")
@@ -37,7 +43,6 @@ exit()
 
 
 
-s = WState(output=-1, a=3, b=1, i=0)
 val = s.eval(ast)
 print('val', val, flush=True, end='\n')
 # print(s, flush=True, end='\n')

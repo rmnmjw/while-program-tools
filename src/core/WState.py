@@ -22,13 +22,27 @@ class WState:
         return result
     
     def eval(self, stringOrAst):
+        type_name = type(stringOrAst).__name__
         ast = None
-        typeName = type(stringOrAst).__name__
-        if typeName == 'str':
-            ast = WParser().parse(stringOrAst)
-        if typeName == 'WAst':
-            ast = stringOrAst
-        ast = ast.get_ast()
-        if type(ast).__name__ == 'Variable':
-            return self.variables.get(ast.get_value())
-        raise Exception(f'Variable "{ast.get_value()}" not defined.')
+        if type_name == 'str':
+            ast = WParser().parse(stringOrAst).get_ast()
+        if type_name == 'WAst':
+            ast = stringOrAst.get_ast()
+        if ast != None:
+            return self.eval_internal(ast)
+        raise Exception(f'WState.eval: Type "{type_name}" is not supported to be evaluated.')
+        
+    
+    def eval_internal(self, ast):
+        type_name = type(ast).__name__
+        method = getattr(self, f'eval_internal_{type_name}')
+        return method(ast)
+    
+    def eval_internal_ExpressionArithmeticAddition(self, ast):
+        total = 0
+        for c in ast.get_children():
+            total += self.eval_internal(c)
+        return total
+    
+    def eval_internal_Number(self, ast):
+        return ast.get_value()

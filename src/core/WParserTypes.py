@@ -142,6 +142,8 @@ class ExpressionArithmetic(WParserBaseType):
         raise Exception(f"NOT IMPLEMENTED YET {tokens}")
     
     def parse(self, tokens):
+        if type(tokens) is str: # fixme: tokens should always be a list. where did it go wrong?
+            return self.parse_single_token([tokens])
         if len(tokens) == 1:
             return self.parse_single_token(tokens)
         else:

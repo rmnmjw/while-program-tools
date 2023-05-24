@@ -85,11 +85,17 @@ class Variable(WParserBaseType):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
+    def to_code(self):
+        return self.get_value()
+    
 class Number(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
+    
+    def to_code(self):
+        return self.get_value()
     
 class ExpressionArithmeticSubstraction(WParserBaseType):
     
@@ -124,6 +130,11 @@ class ExpressionArithmeticAddition(WParserBaseType):
             return [summand0, summand1]
         
         raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
+    
+    def to_code(self):
+        s0 = self.get_child("summand0").to_code()
+        s1 = self.get_child("summand1").to_code()
+        return f'{s0} + {s1}'
 
 class ExpressionArithmetic(WParserBaseType):
     

@@ -189,6 +189,25 @@ class ExpressionBooleanGreaterThan(WParserBaseType):
             return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
 
+
+class ExpressionBooleanEquals(WParserBaseType):
+    
+    def __init__(self, tokens):
+        super().__init__(tokens, self.__class__.__name__)
+        
+        [left, right] = self.parse(tokens)
+        self.set_child('left', left)
+        self.set_child('right', right)
+    
+    # FIXME: make this completely dynamic
+    def parse(self, tokens):
+        if len(tokens) == 3 and tokens[1] == '=':
+            left = ExpressionArithmetic(tokens[0])
+            right = ExpressionArithmetic(tokens[2])
+            return [left, right]
+        raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
+
+
 class ExpressionBoolean(WParserBaseType):
     
     def __init__(self, tokens):
@@ -199,6 +218,8 @@ class ExpressionBoolean(WParserBaseType):
     def parse(self, tokens):
         if len(tokens) == 3 and tokens[1] == ">":
             return ExpressionBooleanGreaterThan(tokens)
+        if len(tokens) == 3 and tokens[1] == "=":
+            return ExpressionBooleanEquals(tokens)
         if len(tokens) == 7:
             if tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-'] and tokens[3] not in KEYWORDS and tokens[4] == ')' and tokens[5] == '<' and tokens[6] not in KEYWORDS:
                 tokens = tokens[6:7] + ['>'] + tokens[0:5]

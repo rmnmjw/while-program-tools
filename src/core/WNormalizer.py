@@ -6,6 +6,7 @@ JUST_CONTINUE = [
     , 'ExpressionArithmeticSubstraction'
     , 'ExpressionArithmeticAddition'
     , 'ExpressionBooleanGreaterThan'
+    , 'ExpressionBooleanEquals'
 ]
 
 IGNORE = [

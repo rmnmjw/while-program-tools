@@ -14,7 +14,7 @@ class WState:
         return self.variables.get(key)
     
     def __repr__(self):
-        result = 'State\n'
+        result = ''
         longest_k = -1
         longest_v = -1
         for k, v in self.variables.items():

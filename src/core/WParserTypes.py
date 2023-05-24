@@ -1,96 +1,55 @@
 import math
 
-class Parsable:
-        
-    def __init__(self, tokens, name):
-        self.tokens = []
-        self.parent = None
-        self.name   = ""
-        self.function = ""
-        self.children = []
-        self.value = None
-        
-        self.tokens = tokens
-        self.set_name(name)
-    
-    def indent(self):
-        el = self
-        for i in range(1000):
-            if not el.parent:
-                return "\t" * (i * 2)
-            el = el.parent
-        return ""
-    
-    def set_child(self, key, value):
-        value.set_parent(self)
-        value.set_function(key)
-        
-        index = -1
-        for i, el in enumerate(self.children):
-            if el.get_function() == key:
-                index = i
-                break
-        if index != -1:
-            self.children[index] = value
-        else:
-            self.children.append(value)
-    
-    def set_children(self, elements):
-        self.children = []
-        for i, el in enumerate(elements):
-            el.set_function('substatement_' + str(i))
-            el.set_parent(self)
-            self.children.append(el)
-    
-    def get_children(self):
-        return self.children
-    
-    def get_child(self, key):
-        for el in self.children:
-            if el.get_function() == key:
-                return el
-    
-    def set_parent(self, parent):
-        self.parent = parent
-    
-    def get_parent(self):
-        return self.parent
-    
-    def set_name(self, name):
-        self.name = name
-    
-    def get_name(self):
-        return self.name
-    
-    def set_function(self, function):
-        self.function = function
-    
-    def get_function(self):
-        return self.function
+from WParserBaseType import WParserBaseType
 
-    def set_value(self, value):
-        self.value = value
+class Statement(WParserBaseType):
+    
+    def __init__(self, tokens):
+        super().__init__(tokens, self.__class__.__name__)
+        self.set_child('substatement', self.parse(tokens))
+    
+    def parse(self, tokens):
+        # sequential
+        depth = 0
+        is_sequential = False
+        for token in tokens:
+            if token in ['if', 'while']:
+                depth += 1
+            if token in ['od', 'fi']:
+                depth -= 1
+            if depth == 0 and token == ';':
+                is_sequential = True
         
-    def get_value(self):
-        return self.value
+        if is_sequential:
+            return StatementSequential(tokens)
+        
+        if tokens[0] == "if":
+            return StatementIfThenElseFi(tokens)
+        
+        if tokens[0] == "while":
+            return StatementWhileDoOd(tokens)
+        
+        if len(tokens) >= 2 and tokens[1] == ":=":
+            return StatementAssignment(tokens)
+        
+        if tokens[0] == "skip":
+            return StatementSkip(tokens)
+        
+        if len(tokens) == 1:
+            is_probably_just_a_single_variable_access = True
+            for forbidden in [' ', '>', '=', ';']:
+                if forbidden in tokens[0]:
+                    is_probably_just_a_single_variable_access = False
+                    break
+            if is_probably_just_a_single_variable_access:
+                return Variable(tokens)
 
-    def __repr__(self):
-        result = ''
-        result += self.indent() + f"<<{self.name}>>"
-        if self.get_value() != None:
-            result += "\n" + self.indent() + f"\tVALUE: {self.get_value()}"
-        for i, s in enumerate(self.get_children()):
-            result += "\n" + self.indent() + f"\t{s.get_function()} ({i+1}/{len(self.get_children())}):"
-            if s == None:
-                result += "\n#### NONE ####"
-            else:
-                result += "\n" + str(s)
-        return result
+        return " - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]"
 
-class TruthValue(Parsable):
+class TruthValue(WParserBaseType):
     pass
 
-class Variable(Parsable):
+class Variable(WParserBaseType):
     
     def __init__(self, tokens):
         if len(tokens) != 1:
@@ -98,13 +57,13 @@ class Variable(Parsable):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
-class Number(Parsable):
+class Number(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
-class ExpressionArithmeticSubstraction(Parsable):
+class ExpressionArithmeticSubstraction(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -121,7 +80,7 @@ class ExpressionArithmeticSubstraction(Parsable):
         
         raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
 
-class ExpressionArithmetic(Parsable):
+class ExpressionArithmetic(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -163,7 +122,7 @@ class ExpressionArithmetic(Parsable):
                 r = self.parse_sindle_assignment(tokens)
                 return r
 
-class ExpressionBooleanGreaterThan(Parsable):
+class ExpressionBooleanGreaterThan(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -180,7 +139,7 @@ class ExpressionBooleanGreaterThan(Parsable):
         
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
 
-class ExpressionBoolean(Parsable):
+class ExpressionBoolean(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -192,42 +151,7 @@ class ExpressionBoolean(Parsable):
         
         raise Exception("Not implemented yet")
 
-class Statement(Parsable):
-    
-    def __init__(self, tokens):
-        super().__init__(tokens, self.__class__.__name__)
-        self.set_child('substatement', self.parse(tokens))
-    
-    def parse(self, tokens):
-        # sequential
-        depth = 0
-        is_sequential = False
-        for token in tokens:
-            if token in ['if', 'while']:
-                depth += 1
-            if token in ['od', 'fi']:
-                depth -= 1
-            if depth == 0 and token == ';':
-                is_sequential = True
-        
-        if is_sequential:
-            return StatementSequential(tokens)
-        
-        if tokens[0] == "if":
-            return StatementIfThenElseFi(tokens)
-        
-        if tokens[0] == "while":
-            return StatementWhileDoOd(tokens)
-        
-        if len(tokens) >= 2 and tokens[1] == ":=":
-            return StatementAssignment(tokens)
-        
-        if tokens[0] == "skip":
-            return StatementSkip(tokens)
-        
-        return " - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]"
-
-class StatementAssignment(Parsable):
+class StatementAssignment(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -242,7 +166,7 @@ class StatementAssignment(Parsable):
         assigner = ExpressionArithmetic(tokens[2:])
         return [assignee, assigner]
 
-class StatementIfThenElseFi(Parsable):
+class StatementIfThenElseFi(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -313,7 +237,7 @@ class StatementIfThenElseFi(Parsable):
         part_else = Statement(part_else)
         return [part_condition, part_then, part_else]
 
-class StatementSequential(Parsable):
+class StatementSequential(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -366,7 +290,7 @@ class StatementSequential(Parsable):
         
         
 
-class StatementWhileDoOd(Parsable):
+class StatementWhileDoOd(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
@@ -402,7 +326,7 @@ class StatementWhileDoOd(Parsable):
         
         return [part_condition, part_body]
 
-class StatementSkip(Parsable):
+class StatementSkip(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)

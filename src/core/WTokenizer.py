@@ -44,6 +44,7 @@ class WTokenizer():
                 if char in [" ", ";", ">", "=", ":", "+", "-", "*", "¬", "∧", "∨"]:
                     break
                 word += char
+            i += j
             tokens.append(word)
 
         return tokens

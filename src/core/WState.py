@@ -47,8 +47,15 @@ class WState:
             total += self.eval_internal(c)
         return total
     
+    def eval_internal_ExpressionArithmeticSubstraction(self, ast):
+        children = ast.get_children()
+        total = self.eval_internal(children[0])
+        for c in children[1:]:
+            total -= self.eval_internal(c)
+        return total    
+    
     def eval_internal_Number(self, ast):
-        return ast.get_value()
+        return int(ast.get_value())
     
     def eval_internal_Variable(self, ast):
         return self.get(ast.get_value())

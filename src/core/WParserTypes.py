@@ -43,13 +43,16 @@ class Statement(WParserBaseType):
             return StatementSkip(tokens)
         
         if len(tokens) == 1:
-            is_probably_just_a_single_variable_access = True
+            is_probably_just_a_single_variable_access_or_number = True
             for forbidden in [' ', '>', '=', ';']:
                 if forbidden in tokens[0]:
-                    is_probably_just_a_single_variable_access = False
+                    is_probably_just_a_single_variable_access_or_number = False
                     break
-            if is_probably_just_a_single_variable_access:
-                return Variable(tokens)
+            if is_probably_just_a_single_variable_access_or_number:
+                if is_number(tokens[0]):
+                    return Number(tokens)
+                else:
+                    return Variable(tokens)
         
         # check if given tokens are an arithmetic expression
         is_arithmetic = True
@@ -143,12 +146,8 @@ class ExpressionArithmetic(WParserBaseType):
             return ExpressionArithmeticSubstraction(tokens)
         if len(tokens) == 3 and tokens[1] == '+':
             return ExpressionArithmeticAddition(tokens)
-        if len(tokens) == 3 and tokens[1] == '>':
-            return ExpressionBooleanGreaterThan(tokens)
-        # if len(tokens) == 7:
-        #     if tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-'] and tokens[3] not in KEYWORDS and tokens[4] == ')' and tokens[5] in ['<', '>', '='] and tokens[6] not in KEYWORDS:
-        #         return 
-        # exit()
+        if len(tokens) == 5 and tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-', '*'] and tokens[3] not in KEYWORDS and tokens[4] == ')':
+            return self.parse_single_assignment(tokens[1:4])
         raise Exception(f"NOT IMPLEMENTED YET {tokens}")
     
     def parse(self, tokens):
@@ -178,12 +177,16 @@ class ExpressionBooleanGreaterThan(WParserBaseType):
         self.set_child('left', left)
         self.set_child('right', right)
     
+    # FIXME: make this completely dynamic
     def parse(self, tokens):
         if len(tokens) == 3 and tokens[1] == '>':
             left = ExpressionArithmetic(tokens[0])
             right = ExpressionArithmetic(tokens[2])
             return [left, right]
-        
+        if len(tokens) == 7 and tokens[0] not in KEYWORDS and tokens[1] == '>' and tokens[2] == '(' and tokens[3] not in KEYWORDS and tokens[4] in ['+', '-', '*'] and tokens[5] not in KEYWORDS and tokens[6] == ')':
+            left = ExpressionArithmetic(tokens[0])
+            right = ExpressionArithmetic(tokens[2:7])
+            return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
 
 class ExpressionBoolean(WParserBaseType):
@@ -192,9 +195,14 @@ class ExpressionBoolean(WParserBaseType):
         super().__init__(tokens, self.__class__.__name__)
         self.set_child('expression', self.parse(tokens))
     
+    # FIXME: make this completely dynamic
     def parse(self, tokens):
         if len(tokens) == 3 and tokens[1] == ">":
             return ExpressionBooleanGreaterThan(tokens)
+        if len(tokens) == 7:
+            if tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-'] and tokens[3] not in KEYWORDS and tokens[4] == ')' and tokens[5] == '<' and tokens[6] not in KEYWORDS:
+                tokens = tokens[6:7] + ['>'] + tokens[0:5]
+                return ExpressionBooleanGreaterThan(tokens)
         
         raise Exception("Not implemented yet")
 

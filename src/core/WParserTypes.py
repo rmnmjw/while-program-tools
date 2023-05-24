@@ -60,7 +60,7 @@ class Statement(WParserBaseType):
         if is_arithmetic:
             return ExpressionArithmetic(tokens)
         
-        return " - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]"
+        raise Exception(" - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]")
 
 class TruthValue(WParserBaseType):
     pass

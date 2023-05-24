@@ -1,6 +1,7 @@
 class WParserBaseType:
         
     def __init__(self, tokens, type):
+        self.label = None
         self.tokens = []
         self.parent = None
         self.type   = ""
@@ -18,6 +19,12 @@ class WParserBaseType:
                 return "\t" * (i * 2)
             el = el.parent
         return ""
+    
+    def set_label(self, label):
+        self.label = label
+    
+    def get_label(self):
+        return self.label
     
     def set_child(self, key, value):
         value.set_parent(self)
@@ -74,7 +81,10 @@ class WParserBaseType:
 
     def __repr__(self):
         result = ''
-        result += self.indent() + f"<<{self.type}>>"
+        if self.label != None:
+            result += self.indent() + f"[<<{self.type}>>] {self.label}"
+        else:
+            result += self.indent() + f"<<{self.type}>>"
         if self.get_value() != None:
             result += "\n" + self.indent() + f"\tVALUE: {self.get_value()}"
         for i, s in enumerate(self.get_children()):

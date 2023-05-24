@@ -1,9 +1,12 @@
 import sys
-sys.path.insert(1, './core')
 
+sys.path.insert(1, './core')
 from WParser import WParser
 from WState import WState
 from WAst import WAst
+
+sys.path.insert(1, './functions')
+from flow import flow
 
 def test(code, result=None):
     # state for eval: start
@@ -37,6 +40,38 @@ assert test("(i + 1) < a")
 
 
 
+
+
+
+
+
+
+
+
+S = """
+b := 1;
+i := 0;
+while a > i do
+    if i = 0 then
+        b := b + a
+    else
+        b := b + 1
+    fi;
+    i := i + 1
+od;
+output := b
+"""
+S = WParser().parse(S)
+
+
+f = flow(S)
+
+
+
+
+
+
+
 # code = """
 # skip;
 # x := 0;
@@ -60,29 +95,5 @@ assert test("(i + 1) < a")
 
 
 
-
-
-
-s = WState(output=-1, a=3, b=1, i=0)
-ast = WParser().parse("a+b")
-value = s.eval(ast)
-print('value', value, flush=True, end='\n')
-exit()
-
-
-
-
-
-val = s.eval(ast)
-print('val', val, flush=True, end='\n')
-# print(s, flush=True, end='\n')
-# state = {
-#     'output': -1,
-#     'a': 3,
-#     'b': 1,
-#     'i': 0
-# }
-
-# print(state, flush=True, end='\n')
 
 

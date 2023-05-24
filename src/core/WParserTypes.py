@@ -43,7 +43,23 @@ class Statement(WParserBaseType):
                     break
             if is_probably_just_a_single_variable_access:
                 return Variable(tokens)
-
+        
+        # check if given tokens are an arithmetic expression
+        is_arithmetic = True
+        toggle = False # True => Variable or Sign; False => Number
+        for token in tokens:
+            toggle ^= True
+            if toggle:
+                if token in ['+', '(', ')']:
+                    is_arithmetic = False
+                    break
+            else:
+                if token not in ['+', '(', ')']:
+                    is_arithmetic = False
+                    break
+        if is_arithmetic:
+            return ExpressionArithmetic(tokens)
+        
         return " - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]"
 
 class TruthValue(WParserBaseType):
@@ -79,6 +95,23 @@ class ExpressionArithmeticSubstraction(WParserBaseType):
             return [minuend, subtrahend]
         
         raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
+    
+class ExpressionArithmeticAddition(WParserBaseType):
+    
+    def __init__(self, tokens):
+        super().__init__(tokens, self.__class__.__name__)
+        
+        [summand0, summand1] = self.parse(tokens)
+        self.set_child('summand0', summand0)
+        self.set_child('summand1', summand1)
+    
+    def parse(self, tokens):
+        if len(tokens) == 3 and tokens[1] == '+':
+            summand0 = ExpressionArithmetic(tokens[0])
+            summand1 = ExpressionArithmetic(tokens[2])
+            return [summand0, summand1]
+        
+        raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
 
 class ExpressionArithmetic(WParserBaseType):
     
@@ -101,9 +134,11 @@ class ExpressionArithmetic(WParserBaseType):
             tokens_variable = [t]
             return Variable(tokens_variable)
     
-    def parse_sindle_assignment(self, tokens):
+    def parse_single_assignment(self, tokens):
         if len(tokens) == 3 and tokens[1] == '-':
             return ExpressionArithmeticSubstraction(tokens)
+        if len(tokens) == 3 and tokens[1] == '+':
+            return ExpressionArithmeticAddition(tokens)
         raise Exception(f"NOT IMPLEMENTED YET {tokens}")
     
     def parse(self, tokens):
@@ -119,7 +154,7 @@ class ExpressionArithmetic(WParserBaseType):
                     count_or += 1
             
             if count_and == 0 and count_or == 0:
-                r = self.parse_sindle_assignment(tokens)
+                r = self.parse_single_assignment(tokens)
                 return r
 
 class ExpressionBooleanGreaterThan(WParserBaseType):

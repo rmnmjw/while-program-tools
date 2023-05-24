@@ -21,7 +21,21 @@ from WAst import WAst
 
 # ast = WParser().parse(code)
 
-ast = WParser().parse("output")
+ast = WParser().parse("1 + 1")
+print('ast', ast, flush=True, end='\n')
+exit()
+
+ast = WParser().parse("1 < 1")
+print('ast', ast, flush=True, end='\n')
+exit()
+
+ast = WParser().parse("a+b")
+print('ast', ast, flush=True, end='\n')
+exit()
+
+
+
+
 
 s = WState(output=-1, a=3, b=1, i=0)
 val = s.eval(ast)

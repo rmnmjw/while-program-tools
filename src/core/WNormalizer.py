@@ -4,6 +4,7 @@ JUST_CONTINUE = [
     , 'StatementWhileDoOd'
     , 'StatementAssignment'
     , 'ExpressionArithmeticSubstraction'
+    , 'ExpressionArithmeticAddition'
     , 'ExpressionBooleanGreaterThan'
 ]
 

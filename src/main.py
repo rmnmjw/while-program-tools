@@ -25,7 +25,7 @@ s = WState(output=-1, a=3, b=1, i=0)
 
 
 
-ast = WParser().parse("99999 + 99999")
+ast = WParser().parse("a + 48")
 # print('ast', ast, flush=True, end='\n')
 val = s.eval(ast)
 print('val', val, flush=True, end='\n')

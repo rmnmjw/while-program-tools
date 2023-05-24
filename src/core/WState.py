@@ -7,8 +7,11 @@ class WState:
         for k, v in kwargs.items():
             self.set(k, v)
     
-    def set(self, k, v):
-        self.variables[k] = v
+    def set(self, key, value):
+        self.variables[key] = value
+    
+    def get(self, key):
+        return self.variables.get(key)
     
     def __repr__(self):
         result = 'State\n'
@@ -46,3 +49,6 @@ class WState:
     
     def eval_internal_Number(self, ast):
         return ast.get_value()
+    
+    def eval_internal_Variable(self, ast):
+        return self.get(ast.get_value())

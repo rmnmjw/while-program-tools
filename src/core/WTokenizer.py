@@ -1,5 +1,5 @@
 class WTokenizer():
-    KEYWORDS = ["skip", "if", "while", "fi", "do", "then", "else", ":=", ">", ";", "od", "+", "-", "*", "=", "¬", "∧", "∨"]
+    KEYWORDS = ["skip", "if", "while", "fi", "do", "then", "else", ":=", ">", ";", "od", "+", "-", "*", "=", "¬", "∧", "∨", "(", ")"]
     
     def __init__(self):
         pass
@@ -41,10 +41,10 @@ class WTokenizer():
             word = ""
             for j in range(1000):
                 char = code[i+j]
-                if char in [" ", ";", ">", "=", ":", "+", "-", "*", "¬", "∧", "∨"]:
+                if char in [" ", ";", ">", "=", ":", "+", "-", "*", "¬", "∧", "∨", "(", ")"]:
                     break
                 word += char
-            i += j
+            i += j-1
             tokens.append(word)
 
         return tokens

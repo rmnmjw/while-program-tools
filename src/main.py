@@ -6,7 +6,8 @@ from WState import WState
 from WAst import WAst
 
 sys.path.insert(1, './functions')
-from flow import flow
+from create_flow import create_flow
+from add_labels import add_labels
 
 def test(code, result=None):
     # state for eval: start
@@ -62,10 +63,14 @@ od;
 output := b
 """
 S = WParser().parse(S)
+add_labels(S)
+# print(S, flush=True, end='\n')
+# print('#################################', flush=True, end='\n')
+# print('#################################', flush=True, end='\n')
+# print('#################################', flush=True, end='\n')
 
-
-f = flow(S)
-
+f = create_flow(S)
+print("result flow:", f, flush=True, end='\n')
 
 
 

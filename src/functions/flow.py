@@ -106,8 +106,9 @@ def flow_internal(el, source=None, candidates=set()):
         return candidates
     if clazz == StatementSkip: # TODO: review this
         el_next = get_next(el)
-        candidates.add((el.get_label(), el_next.get_label()))
-        candidates.update(flow_internal(el_next, el_next.get_label()))
+        if el_next != None:
+            candidates.add((el.get_label(), el_next.get_label()))
+            candidates.update(flow_internal(el_next, el_next.get_label()))
         return candidates
     raise Exception(f'flow_internal(): Class "{clazz}" unhandled.')
 

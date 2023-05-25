@@ -36,7 +36,25 @@ if False:
     assert test("1>0")
     assert test("0>1")
     assert test("(i + 1) < a")
+    
+    S = """b:=1;i:=0;while a>i do if i=0 then b:=b+a else b:=b+1 fi;i:=i+1 od;output:=b;skip"""
+    S = WParser().parse(S)
+    add_labels(S)
+    result = """[b := 1]^1;
+[i := 0]^2;
+while [a > i]^3 do
+    if [i = 0]^4 then
+        [b := b + a]^5
+    else
+        [b := b + 1]^6
+    fi;
+    [i := i + 1]^7
+od;
+[output := b]^8;
+[skip]^9"""
+    assert result == S.to_code()
 
+    exit()
 
 
 

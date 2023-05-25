@@ -47,5 +47,4 @@ class WTokenizer():
                 word += char
             i += j-1
             tokens.append(word)
-
         return tokens

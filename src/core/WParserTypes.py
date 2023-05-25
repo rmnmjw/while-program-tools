@@ -114,6 +114,11 @@ class ExpressionArithmeticSubstraction(WParserBaseType):
         
         raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
     
+    def to_code(self):
+        m = self.get_child("minuend").to_code()
+        s = self.get_child("subtrahend").to_code()
+        return f'{m} + {s}'
+    
 class ExpressionArithmeticAddition(WParserBaseType):
     
     def __init__(self, tokens):
@@ -265,10 +270,11 @@ class StatementAssignment(WParserBaseType):
         ee = self.get_child("assignee").to_code()
         er = self.get_child("assigner").to_code()
         label = self.get_label()
+        ci = self.indent_code()
+        result = f'{ee} := {er}'
         if label != None:
-            return f'[{ee} := {er}]^{label}'
-        else:
-            return f'{ee} := {er}'
+            result = f'{ci}[{result}]^{label}'
+        return result
 
 class StatementIfThenElseFi(WParserBaseType):
     
@@ -336,9 +342,9 @@ class StatementIfThenElseFi(WParserBaseType):
                 break
         part_else = tokens[else_start:else_end]
         
-        part_condition = ExpressionBoolean(part_condition)
-        part_then = Statement(part_then)
-        part_else = Statement(part_else)
+        part_condition = ExpressionBoolean([el for el in part_condition if el != ''])
+        part_then = Statement([el for el in part_then if el != ''])
+        part_else = Statement([el for el in part_else if el != ''])
         return [part_condition, part_then, part_else]
     
     def to_code(self):
@@ -349,7 +355,8 @@ class StatementIfThenElseFi(WParserBaseType):
         label = c.get_label()
         if label != None:
             cc = f'[{cc}]^{label}'
-        result = f'if {cc} then\n{t}\nelse\n{f}\nfi'
+        ci = self.indent_code()
+        result = f'{ci}if {cc} then\n{t}\n{ci}else\n{f}\n{ci}fi'
         return result
 
 class StatementSequential(WParserBaseType):
@@ -452,8 +459,9 @@ class StatementWhileDoOd(WParserBaseType):
         label = c.get_label()
         if c != None:
             cc = f'[{cc}]^{label}'
-        result  = f'while {cc} do'
-        result += f'\n{self.get_child("body").to_code()}\nod'
+        ci = self.indent_code()
+        result  = f'{ci}while {cc} do'
+        result += f'\n{self.get_child("body").to_code()}\n{ci}od'
         return result
 
 class StatementSkip(WParserBaseType):
@@ -464,5 +472,5 @@ class StatementSkip(WParserBaseType):
     def to_code(self):
         label = self.get_label()
         if label != None:
-            return f'[skip]^{label}'
+            return f'{self.indent_code()}[skip]^{label}'
         return 'skip'

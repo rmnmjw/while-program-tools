@@ -20,6 +20,24 @@ class WParserBaseType:
             el = el.parent
         return ""
     
+    def indent_code(self):
+        el = self.get_parent()
+        c = 0
+        for i in range(1000):
+            if not el:
+                return c * '    '
+            clazzName = type(el).__name__
+            if clazzName == 'StatementSequential':
+                pass
+            elif clazzName == 'StatementWhileDoOd':
+                c += 1
+            elif clazzName == 'StatementIfThenElseFi':
+                c += 1
+            else:
+                raise Exception(f'WParserBaseType.indent_code(): class {clazzName} is not handled.')
+            el = el.parent
+        return ""
+    
     def set_label(self, label):
         self.label = label
     

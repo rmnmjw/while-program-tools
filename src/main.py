@@ -8,6 +8,8 @@ from WAst import WAst
 sys.path.insert(1, './functions')
 from flow import flow
 from add_labels import add_labels
+from blocks import blocks
+
 
 if False:
     def test(code, result=None):
@@ -75,44 +77,12 @@ skip
 """
 S = WParser().parse(S)
 add_labels(S)
-
 print(S.to_code(), flush=True, end='\n')
-exit()
 
-# print(S, flush=True, end='\n')
-# print('#################################', flush=True, end='\n')
-# print('#################################', flush=True, end='\n')
-# print('#################################', flush=True, end='\n')
+# f = flow(S)
+# print("result flow:", f, flush=True, end='\n')
 
-f = flow(S)
-print("result flow:", f, flush=True, end='\n')
-
-
-
-
-
-
-# code = """
-# skip;
-# x := 0;
-# if b > a then
-#     x := 0
-# else
-#     x := 5;
-#     while a > x do
-#         a := a - 1
-#     od
-# fi;
-# b := a
-# """
-
-# ast = WParser().parse(code)
-
-
-# s = WState(output=-1, a=3, b=1, i=0)
-# ast = WParser().parse("(i + 1) < a")
-# value = s.eval(ast)
-
+    
 
 
 

@@ -10,4 +10,8 @@ class OrderedSet(collections.OrderedDict):
     def add(self, val):
         self[val] = None
     
+    def update(self, vals):
+        for v in vals:
+            self[v] = None
+    
     # TODO: add all the other needed methods

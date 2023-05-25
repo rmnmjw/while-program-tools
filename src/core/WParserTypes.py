@@ -206,7 +206,11 @@ class ExpressionBooleanGreaterThan(WParserBaseType):
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
     
     def to_code(self):
-        return f'{self.get_child("left").to_code()} > {self.get_child("right").to_code()}'
+        result = f'{self.get_child("left").to_code()} > {self.get_child("right").to_code()}'
+        label = self.get_label()
+        if label != None:
+            result = f'[{result}]^{label}'
+        return result
 
 
 class ExpressionBooleanEquals(WParserBaseType):
@@ -229,7 +233,11 @@ class ExpressionBooleanEquals(WParserBaseType):
     def to_code(self):
         l = self.get_child('left').to_code()
         r = self.get_child('right').to_code()
-        return f'{l} = {r}'
+        result = f'{l} = {r}'
+        label = self.get_label()
+        if label != None:
+            result = f'[{result}]^{label}'
+        return result
 
 
 class ExpressionBoolean(WParserBaseType):
@@ -348,15 +356,11 @@ class StatementIfThenElseFi(WParserBaseType):
         return [part_condition, part_then, part_else]
     
     def to_code(self):
-        c = self.get_child('condition')
-        cc = c.to_code()
+        c = self.get_child('condition').to_code()
         t = self.get_child('statementTrue').to_code()
         f = self.get_child('statementFalse').to_code()
-        label = c.get_label()
-        if label != None:
-            cc = f'[{cc}]^{label}'
         ci = self.indent_code()
-        result = f'{ci}if {cc} then\n{t}\n{ci}else\n{f}\n{ci}fi'
+        result = f'{ci}if {c} then\n{t}\n{ci}else\n{f}\n{ci}fi'
         return result
 
 class StatementSequential(WParserBaseType):
@@ -455,12 +459,9 @@ class StatementWhileDoOd(WParserBaseType):
     
     def to_code(self):
         c = self.get_child("condition")
-        cc = c.to_code()
         label = c.get_label()
-        if c != None:
-            cc = f'[{cc}]^{label}'
         ci = self.indent_code()
-        result  = f'{ci}while {cc} do'
+        result  = f'{ci}while {c.to_code()} do'
         result += f'\n{self.get_child("body").to_code()}\n{ci}od'
         return result
 

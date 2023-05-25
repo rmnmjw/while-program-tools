@@ -6,7 +6,7 @@ from WState import WState
 from WAst import WAst
 
 sys.path.insert(1, './functions')
-from create_flow import create_flow
+from flow import flow
 from add_labels import add_labels
 
 def test(code, result=None):
@@ -60,16 +60,21 @@ while a > i do
     fi;
     i := i + 1
 od;
-output := b
+output := b;
+skip
 """
 S = WParser().parse(S)
 add_labels(S)
+
+print(S.to_code(), flush=True, end='\n')
+exit()
+
 # print(S, flush=True, end='\n')
 # print('#################################', flush=True, end='\n')
 # print('#################################', flush=True, end='\n')
 # print('#################################', flush=True, end='\n')
 
-f = create_flow(S)
+f = flow(S)
 print("result flow:", f, flush=True, end='\n')
 
 
@@ -102,3 +107,4 @@ print("result flow:", f, flush=True, end='\n')
 
 
 
+print("done.", flush=True, end='\n')

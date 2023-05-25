@@ -8,3 +8,6 @@ class WAst:
     
     def get_ast(self):
         return self.ast
+    
+    def to_code(self):
+        return self.ast.to_code()

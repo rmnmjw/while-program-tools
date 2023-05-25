@@ -199,6 +199,9 @@ class ExpressionBooleanGreaterThan(WParserBaseType):
             right = ExpressionArithmetic(tokens[2:7])
             return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
+    
+    def to_code(self):
+        return f'{self.get_child("left").to_code()} > {self.get_child("right").to_code()}'
 
 
 class ExpressionBooleanEquals(WParserBaseType):
@@ -217,6 +220,11 @@ class ExpressionBooleanEquals(WParserBaseType):
             right = ExpressionArithmetic(tokens[2])
             return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
+
+    def to_code(self):
+        l = self.get_child('left').to_code()
+        r = self.get_child('right').to_code()
+        return f'{l} = {r}'
 
 
 class ExpressionBoolean(WParserBaseType):
@@ -252,6 +260,15 @@ class StatementAssignment(WParserBaseType):
         assignee = Variable(tokens[0:1])
         assigner = ExpressionArithmetic(tokens[2:])
         return [assignee, assigner]
+    
+    def to_code(self):
+        ee = self.get_child("assignee").to_code()
+        er = self.get_child("assigner").to_code()
+        label = self.get_label()
+        if label != None:
+            return f'[{ee} := {er}]^{label}'
+        else:
+            return f'{ee} := {er}'
 
 class StatementIfThenElseFi(WParserBaseType):
     
@@ -323,6 +340,17 @@ class StatementIfThenElseFi(WParserBaseType):
         part_then = Statement(part_then)
         part_else = Statement(part_else)
         return [part_condition, part_then, part_else]
+    
+    def to_code(self):
+        c = self.get_child('condition')
+        cc = c.to_code()
+        t = self.get_child('statementTrue').to_code()
+        f = self.get_child('statementFalse').to_code()
+        label = c.get_label()
+        if label != None:
+            cc = f'[{cc}]^{label}'
+        result = f'if {cc} then\n{t}\nelse\n{f}\nfi'
+        return result
 
 class StatementSequential(WParserBaseType):
     
@@ -372,6 +400,11 @@ class StatementSequential(WParserBaseType):
         
         return parts
     
+    def to_code(self):
+        result = ""
+        result = ';\n'.join([c.to_code() for c in self.get_children()])
+        return result
+    
    
         
         
@@ -412,8 +445,24 @@ class StatementWhileDoOd(WParserBaseType):
         part_body = tokens[body_start:body_end]
         
         return [part_condition, part_body]
+    
+    def to_code(self):
+        c = self.get_child("condition")
+        cc = c.to_code()
+        label = c.get_label()
+        if c != None:
+            cc = f'[{cc}]^{label}'
+        result  = f'while {cc} do'
+        result += f'\n{self.get_child("body").to_code()}\nod'
+        return result
 
 class StatementSkip(WParserBaseType):
     
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
+    
+    def to_code(self):
+        label = self.get_label()
+        if label != None:
+            return f'[skip]^{label}'
+        return 'skip'

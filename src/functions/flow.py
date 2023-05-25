@@ -1,13 +1,17 @@
 import sys
-import collections
 
-sys.path.insert(1, '../core')
+sys.path.insert(1, './core')
 from WAst import WAst
 from WParserTypes import StatementSequential
 from WParserTypes import StatementAssignment
 from WParserTypes import StatementWhileDoOd
 from WParserTypes import StatementIfThenElseFi
+from WParserTypes import StatementSkip
+
 from add_labels import add_labels
+
+sys.path.insert(1, './helpers')
+from OrderedSet import OrderedSet
 
 def find_first_child(el):
     if el.get_label() != None:
@@ -29,6 +33,8 @@ def find_last_upper_children(el):
         s0 = el.get_child('statementTrue')
         s1 = el.get_child('statementFalse')
         return [s0, s1]
+    if clazz == StatementSkip:
+        return [el]
     raise Exception(f'find_last_upper_children(): Class "{clazz}" unhandled.')
 
 def get_next(el):
@@ -48,72 +54,67 @@ def get_next(el):
             return parents_next
     return None
 
-class Flow(collections .OrderedDict):
-    def __init__(self, flow):
-        super().__init__()
-        for f in flow:
-            self.add(f)
-    
-    def __repr__(self):
-        return str(list(self.keys()))
-    
-    def add(self, val):
-        self[val] = None
-        
-def sort_flow(flow):
-    flow = list(flow)
-    flow.sort()
-    flow = Flow(flow)
-    return flow
-
-def create_flow(el, source=None, flow=set()):
+def flow_internal(el, source=None, candidates=set()):
     clazz = type(el)
     if clazz == WAst:
         add_labels(el)
-        flow.update(create_flow(el.get_ast()))
-        return sort_flow(flow)
+        candidates.update(flow_internal(el.get_ast()))
+        return candidates
     if clazz == StatementSequential:
         children = el.get_children()
         if source != None:
             if len(children) >= 1:
                 print('source', source, flush=True, end='\n')
                 first = find_first_child(children[0])
-                flow.add((source, first.get_label()))
+                candidates.add((source, first.get_label()))
         if len(children) == 2:
             for src in find_last_upper_children(children[0]):
                 dst = find_first_child(children[1])
                 if src != None and dst != None: # workaround for while etc
                     if src.get_label() != None and dst.get_label() != None: # workaround for while etc
-                        flow.add((src.get_label(), dst.get_label()))
+                        candidates.add((src.get_label(), dst.get_label()))
         for c in children:
-            flow.update(create_flow(c, source))
-        return flow
+            candidates.update(flow_internal(c, source))
+        return candidates
     if clazz == StatementAssignment:
         el_next = get_next(el)
         if el_next != None:
-            flow.add((el.get_label(), el_next.get_label()))
-        return flow
+            candidates.add((el.get_label(), el_next.get_label()))
+        return candidates
     if clazz == StatementWhileDoOd:
         first = find_first_child(el.get_child('body'))
         if first != None:
-            flow.add((el.get_child('condition').get_label(), first.get_label()))
-        flow.update(create_flow(el.get_child('body'), el.get_label()))
+            candidates.add((el.get_child('condition').get_label(), first.get_label()))
+        candidates.update(flow_internal(el.get_child('body'), el.get_label()))
         el_next = get_next(el)
         if el_next != None:
-            flow.add((el.get_child('condition').get_label(), el_next.get_label()))
-        return flow
+            candidates.add((el.get_child('condition').get_label(), el_next.get_label()))
+        return candidates
     if clazz == StatementIfThenElseFi:
         condition = el.get_child('condition')
         
         sTrue = el.get_child('statementTrue')
         sTrueChild = find_first_child(sTrue)
-        flow.add((condition.get_label(), sTrueChild.get_label()))
-        f = create_flow(sTrue)
-        flow.update(create_flow(sTrue, el.get_child('condition').get_label()))
+        candidates.add((condition.get_label(), sTrueChild.get_label()))
+        f = flow_internal(sTrue)
+        candidates.update(flow_internal(sTrue, el.get_child('condition').get_label()))
         
         sFalse = el.get_child('statementFalse')
         sFalseChild = find_first_child(sFalse)
-        flow.add((condition.get_label(), sFalseChild.get_label()))
-        flow.update(create_flow(sFalse, el.get_label()))
-        return flow
-    raise Exception(f'create_flow(): Class "{clazz}" unhandled.')
+        candidates.add((condition.get_label(), sFalseChild.get_label()))
+        candidates.update(flow_internal(sFalse, el.get_label()))
+        return candidates
+    if clazz == StatementSkip: # TODO: review this
+        el_next = get_next(el)
+        candidates.add((el.get_label(), el_next.get_label()))
+        candidates.update(flow_internal(el_next, el_next.get_label()))
+        return candidates
+    raise Exception(f'flow_internal(): Class "{clazz}" unhandled.')
+
+class flow(OrderedSet):
+    def __init__(self, ast):
+        super().__init__()
+        flow_unordered = list(flow_internal(ast))
+        flow_unordered.sort()
+        for f in flow_unordered:
+            self.add(f)

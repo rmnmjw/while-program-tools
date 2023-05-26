@@ -1,4 +1,5 @@
 from WParser import WParser
+from WParserBaseType import WParserBaseType
 
 class WState:
     
@@ -28,15 +29,14 @@ class WState:
         return self.eval(stringOrAst)
     
     def eval(self, stringOrAst):
-        type_name = type(stringOrAst).__name__
         ast = None
-        if type_name == 'str':
+        if WParserBaseType in type(stringOrAst).__bases__:
+            ast = stringOrAst
+        if type(stringOrAst) == str:
             ast = WParser().parse(stringOrAst).get_ast()
-        if type_name == 'WAst':
-            ast = stringOrAst.get_ast()
         if ast != None:
             return self.eval_internal(ast)
-        raise Exception(f'WState.eval: Type "{type_name}" is not supported to be evaluated.')
+        raise Exception(f'WState.eval: Type "{type(stringOrAst)}" is not supported to be evaluated.')
         
     
     def eval_internal(self, ast):

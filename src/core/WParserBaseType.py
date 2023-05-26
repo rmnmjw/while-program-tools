@@ -112,3 +112,15 @@ class WParserBaseType:
             else:
                 result += "\n" + str(s)
         return result
+    
+    def __lt__(self, other):
+        return self.get_label() < other.get_label()
+    
+    def __le__(self, other):
+        return self.get_label() <= other.get_label()
+    
+    def __gt__(self, other):
+        return self.get_label() > other.get_label()
+    
+    def __ge__(self, other):
+        return self.get_label() >= other.get_label()

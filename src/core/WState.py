@@ -24,6 +24,9 @@ class WState:
             result += '    ' + k.rjust(longest_k) + ' |-> ' + str(v).rjust(longest_v) + '\n'
         return result
     
+    def __call__(self, stringOrAst):
+        return self.eval(stringOrAst)
+    
     def eval(self, stringOrAst):
         type_name = type(stringOrAst).__name__
         ast = None

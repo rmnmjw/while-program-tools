@@ -1,7 +1,6 @@
 import sys
 
 sys.path.insert(1, './core')
-from WAst import WAst
 from WParserTypes import StatementSequential
 from WParserTypes import StatementAssignment
 from WParserTypes import StatementWhileDoOd
@@ -20,9 +19,6 @@ class flow(OrderedSet):
     def __init__(self, el):
         super().__init__()
         clazz = type(el)
-        if clazz == WAst:
-            self.update(flow(el.get_ast()))
-            return
         '''Spec conform implementation, see slide 49'''
         if clazz == StatementSkip:
             return # {}

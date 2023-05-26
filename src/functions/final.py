@@ -1,4 +1,3 @@
-from WAst import WAst
 from WParserTypes import StatementSequential
 from WParserTypes import StatementAssignment
 from WParserTypes import StatementWhileDoOd
@@ -8,8 +7,6 @@ from WParserTypes import StatementIfThenElseFi
 def final(el):
     '''Slide 47'''
     clazz = type(el)
-    if clazz == WAst:
-        return final(el.get_ast())
     if clazz == StatementSkip:
         return {el.get_label()}
     if clazz == StatementAssignment:

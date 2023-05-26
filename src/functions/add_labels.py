@@ -1,7 +1,6 @@
 import sys
 
 sys.path.insert(1, '../core')
-from WAst import WAst
 from WParserTypes import StatementSequential
 from WParserTypes import StatementAssignment
 from WParserTypes import StatementWhileDoOd
@@ -12,10 +11,6 @@ current_label = 1
 def add_labels(el):
     global current_label
     clazz = type(el)
-    if clazz == WAst:
-        current_label = 1
-        add_labels(el.get_ast())
-        return
     if clazz == StatementSequential:
         for c in el.get_children():
             add_labels(c)

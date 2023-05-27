@@ -13,6 +13,23 @@ class WState:
         self.name = 'σ'
         self.counter = 0
     
+    def __eq__(self, other):
+        for k in set(self.variables.keys()).union(set(other.variables.keys())):
+            if k not in self.variables or k not in other.variables:
+                return False
+            if self.get(k) != other.get(k):
+                return False
+        return self.counter == other.counter
+
+    def __hash__(self):
+        h = self.counter.__hash__()
+        for v in self.variables:
+            h += v.__hash__()
+        return h
+    
+    def __lt__(self, other):
+        return self.counter < other.counter
+    
     def get_name(self):
         if self.counter != 0:
             return f'{self.name}_{self.counter}'

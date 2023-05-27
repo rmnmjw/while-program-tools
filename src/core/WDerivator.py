@@ -35,7 +35,7 @@ class Derivation:
                 result += f'{pre}<{code}, {state.get_name()}>'
             else:
                 result += f'{pre}{state.get_name()}'
-        print(result, flush=True, end='\n')
+        return result
 
 class WDerivator:
     

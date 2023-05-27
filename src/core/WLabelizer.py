@@ -1,6 +1,6 @@
-import sys
+import os, sys, pathlib
+for p in ['core', 'helpers', 'functions']: sys.path.insert(1, f'{os.path.join(pathlib.Path(__file__).parent.parent.resolve(), p)}')
 
-sys.path.insert(1, './core')
 from WParserTypes import ExpressionBooleanGreaterThan
 from WParserTypes import Statement
 from WParserTypes import StatementAssignment
@@ -10,7 +10,6 @@ from WParserTypes import StatementSkip
 from WParserTypes import StatementWhileDoOd
 from WParserTypes import ExpressionArithmeticAddition
 
-sys.path.insert(1, './functions')
 from flow import flow
 from blocks import blocks
 

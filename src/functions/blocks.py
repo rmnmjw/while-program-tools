@@ -1,6 +1,6 @@
-import sys
+import os, sys, pathlib
+for p in ['core', 'helpers', 'functions']: sys.path.insert(1, f'{os.path.join(pathlib.Path(__file__).parent.parent.resolve(), p)}')
 
-sys.path.insert(1, './helpers')
 from OrderedSet import OrderedSet
 
 def blocks(el):

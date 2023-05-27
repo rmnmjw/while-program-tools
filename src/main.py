@@ -1,11 +1,10 @@
-import sys
+import os, sys, pathlib
+for p in ['core', 'helpers', 'functions']: sys.path.insert(1, f'{os.path.join(pathlib.Path(__file__).parent.resolve(), p)}')
 
-sys.path.insert(1, './core')
 from WParser import WParser
 from WState import WState
 from WDerivator import WDerivator
 
-sys.path.insert(1, './functions')
 from flow import flow
 
 def do_some_testing():

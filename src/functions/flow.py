@@ -1,6 +1,6 @@
-import sys
+import os, sys, pathlib
+for p in ['core', 'helpers', 'functions']: sys.path.insert(1, f'{os.path.join(pathlib.Path(__file__).parent.parent.resolve(), p)}')
 
-sys.path.insert(1, './core')
 from WParserTypes import StatementSequential
 from WParserTypes import StatementAssignment
 from WParserTypes import StatementWhileDoOd
@@ -11,7 +11,6 @@ from WParserTypes import ExpressionBooleanEquals
 from init import init
 from final import final
 
-sys.path.insert(1, './helpers')
 from OrderedSet import OrderedSet
 
 class flow(OrderedSet):

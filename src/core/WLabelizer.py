@@ -1,17 +1,19 @@
 import os, sys, pathlib
 for p in ['core', 'helpers', 'functions']: sys.path.insert(1, f'{os.path.join(pathlib.Path(__file__).parent.parent.resolve(), p)}')
 
+from WParserTypes import ExpressionArithmeticAddition
+from WParserTypes import ExpressionArithmeticSubstraction
 from WParserTypes import ExpressionBooleanGreaterThan
+from WParserTypes import Number
 from WParserTypes import Statement
 from WParserTypes import StatementAssignment
 from WParserTypes import StatementIfThenElseFi
 from WParserTypes import StatementSequential
 from WParserTypes import StatementSkip
 from WParserTypes import StatementWhileDoOd
-from WParserTypes import ExpressionArithmeticAddition
 
-from flow import flow
 from blocks import blocks
+from flow import flow
 
 
 class WLabelizer:
@@ -60,6 +62,12 @@ class WLabelizer:
         if clazz == ExpressionArithmeticAddition:
             el.set_label(self.current_label)
             self.current_label += 1
+            return
+        if clazz == ExpressionArithmeticSubstraction:
+            el.set_label(self.current_label)
+            self.current_label += 1
+            return
+        if clazz == Number:
             return
         raise Exception(f'Labelizer.add_labels(): Case of type "{clazz}" is not handled.')
     

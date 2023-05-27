@@ -5,19 +5,27 @@ from WParserTypes import StatementSkip
 from WParserTypes import StatementIfThenElseFi
 from WParserTypes import Statement
 
-def init(el):
+def init(el, withElement=False):
     clazz = type(el)
     if clazz == Statement:
-        return init(el.get_child('substatement'))
+        return init(el.get_child('substatement'), withElement)
     '''Slide 46'''
     if clazz == StatementSkip:
-        return el.get_label(), el
+        if withElement:
+            return el.get_label(), el
+        return el.get_label()
     if clazz == StatementAssignment:
-        return el.get_label(), el
+        if withElement:
+            return el.get_label(), el
+        return el.get_label()
     if clazz == StatementSequential:
-        return init(el.get_child('substatement_0'))
+        return init(el.get_child('substatement_0'), withElement)
     if clazz == StatementIfThenElseFi:
-        return el.get_child('condition').get_label(), el.get_child('condition')
+        if withElement:
+            return el.get_child('condition').get_label(), el.get_child('condition')
+        return el.get_child('condition').get_label()
     if clazz == StatementWhileDoOd:
-        return el.get_child('condition').get_label(), el.get_child('condition')
+        if withElement:
+            return el.get_child('condition').get_label(), el.get_child('condition')
+        return el.get_child('condition').get_label()
     raise Exception(f'init(): Unhandled class "{clazz}"')

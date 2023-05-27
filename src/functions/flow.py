@@ -7,6 +7,7 @@ from WParserTypes import StatementWhileDoOd
 from WParserTypes import StatementIfThenElseFi
 from WParserTypes import StatementSkip
 from WParserTypes import ExpressionBooleanEquals
+from WParserTypes import Statement
 
 from init import init
 from final import final
@@ -58,4 +59,9 @@ class flow(OrderedSet):
             union = Sf.union(xf1).union(xf2)
             self.update(union)
             return
+        if clazz == Statement:
+            x = flow(el.get_child('substatement'))
+            self.update(x)
+            return
         raise Exception(f'flow(): Type "{clazz}" unhandled.')
+    

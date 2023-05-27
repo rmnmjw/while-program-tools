@@ -57,7 +57,7 @@ class WDerivator:
     
     def step(self):
         ast, state = self.last()
-        _, subject = init(ast)
+        _, subject = init(ast, True)
         if type(subject) == StatementAssignment:
             value, state = state.eval(subject)
             state.increment_counter()

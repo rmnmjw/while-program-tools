@@ -92,10 +92,10 @@ skip
 
 
 
-
-        
-
 S = WParser().parse(S)
-exe = WDerivator(S, WState(output=-1, a=3, b=1, i=0))
+# print(S.to_code(), flush=True, end='\n')
 
-print(exe.derivate().beautiful(), flush=True, end='\n')
+
+# exe = WDerivator(S, WState(output=-1, a=3, b=1, i=0))
+
+# print(exe.derivate().beautiful(), flush=True, end='\n')

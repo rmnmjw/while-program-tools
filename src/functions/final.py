@@ -1,8 +1,9 @@
-from WParserTypes import StatementSequential
+from WParserTypes import Statement
 from WParserTypes import StatementAssignment
-from WParserTypes import StatementWhileDoOd
-from WParserTypes import StatementSkip
 from WParserTypes import StatementIfThenElseFi
+from WParserTypes import StatementSequential
+from WParserTypes import StatementSkip
+from WParserTypes import StatementWhileDoOd
 
 def final(el):
     '''Slide 47'''
@@ -19,4 +20,6 @@ def final(el):
         return S1f.union(S2f)
     if clazz == StatementWhileDoOd:
         return {el.get_child('condition').get_label()}
+    if clazz == Statement:
+        return final(el.get_child('substatement'))
     raise Exception(f'final(): Unhandled class "{clazz}"')

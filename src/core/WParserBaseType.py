@@ -1,4 +1,4 @@
-class WParserBaseType:
+class WParserBaseTypeInternal:
         
     def __init__(self, tokens, type):
         self.label = None
@@ -8,9 +8,15 @@ class WParserBaseType:
         self.function = ""
         self.children = []
         self.value = None
+        self.name = 'S'
         
         self.tokens = tokens
         self.set_type(type)
+        
+        self.accessed_from = None
+    
+    def get_name(self):
+        return self.name
     
     def indent(self):
         el = self
@@ -33,8 +39,10 @@ class WParserBaseType:
                 c += 1
             elif clazzName == 'StatementIfThenElseFi':
                 c += 1
+            elif clazzName == 'Statement':
+                pass
             else:
-                raise Exception(f'WParserBaseType.indent_code(): class {clazzName} is not handled.')
+                raise Exception(f'WParserBaseType.indent_code(): class "{clazzName}" is not handled.')
             el = el.parent
         return ""
     
@@ -45,8 +53,9 @@ class WParserBaseType:
         return self.label
     
     def set_child(self, key, value):
-        value.set_parent(self)
-        value.set_function(key)
+        if value != None:
+            value.set_parent(self)
+            value.set_function(key)
         
         index = -1
         for i, el in enumerate(self.children):
@@ -72,6 +81,11 @@ class WParserBaseType:
         for el in self.children:
             if el.get_function() == key:
                 return el
+    
+    def remove_child(self, child):
+        self.set_child(child.get_function(), Deleted())
+        print(self.get_parent(), flush=True, end='\n')
+        exit()
     
     def set_parent(self, parent):
         self.parent = parent
@@ -124,3 +138,40 @@ class WParserBaseType:
     
     def __ge__(self, other):
         return self.get_label() >= other.get_label()
+
+class Deleted(WParserBaseTypeInternal):
+    def __init__(self):
+        super().__init__([], self.__class__.__name__)
+        pass
+
+class WParserBaseType(WParserBaseTypeInternal):
+    
+    def pull_up(self, dst, dst_src):
+        el_dst = self.get_child(dst)
+        el_dst_src = el_dst.get_child(dst_src)
+        self.set_child(dst, el_dst_src)
+    
+    def remove_child(self, child):
+        self.set_child(child.get_function(), Deleted())
+        parent = self.get_parent()
+        clazz = type(parent).__name__
+        if parent == None:
+            remaining = [c for c in self.get_children() if type(c) != Deleted]
+            if len(remaining) == 1:
+                self = remaining[0]
+                return
+            if len(remaining) == 0:
+                return # were probably done here with derivating
+        else:
+            if clazz == 'StatementSequential':
+                remaining = [c for c in self.get_children() if type(c) != Deleted]
+                if len(remaining) == 1:
+                    parent.pull_up(self.get_function(), remaining[0].get_function())
+                    return
+            if clazz == 'Statement':
+                remaining = [c for c in self.get_children() if type(c) != Deleted]
+                if len(remaining) == 1:
+                    parent.pull_up(self.get_function(), remaining[0].get_function())
+                    return
+        raise Exception(f'WParserBaseType.remove_child(): class "{clazz}" is not handled.')
+    

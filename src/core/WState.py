@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from WParser import WParser
 from WParserBaseType import WParserBaseType
 
@@ -7,6 +9,20 @@ class WState:
         self.variables = {}
         for k, v in kwargs.items():
             self.set(k, v)
+        
+        self.name = 'σ'
+        self.counter = 0
+    
+    def get_name(self):
+        if self.counter != 0:
+            return f'{self.name}_{self.counter}'
+        return self.name
+    
+    def increment_counter(self):
+        self.counter += 1
+    
+    def clone(self):
+        return deepcopy(self)
     
     def set(self, key, value):
         self.variables[key] = value
@@ -15,6 +31,9 @@ class WState:
         return self.variables.get(key)
     
     def __repr__(self):
+        return str(self.variables)
+    
+    def beautiful(self):
         result = ''
         longest_k = -1
         longest_v = -1
@@ -28,21 +47,27 @@ class WState:
     def __call__(self, stringOrAst):
         return self.eval(stringOrAst)
     
-    def eval(self, stringOrAst):
+    def get_ast_from(self, stringOrAst):
         ast = None
         if WParserBaseType in type(stringOrAst).__bases__:
             ast = stringOrAst
         if type(stringOrAst) == str:
-            ast = WParser().parse(stringOrAst).get_ast()
+            ast = WParser().parse(stringOrAst)
+        return ast
+    
+    def eval(self, stringOrAst):
+        ast = self.get_ast_from(stringOrAst)
         if ast != None:
-            return self.eval_internal(ast)
+            return self.eval_internal(ast), self
         raise Exception(f'WState.eval: Type "{type(stringOrAst)}" is not supported to be evaluated.')
-        
     
     def eval_internal(self, ast):
         type_name = type(ast).__name__
         method = getattr(self, f'eval_internal_{type_name}')
         return method(ast)
+    
+    def eval_internal_Statement(self, ast):
+        return self.eval_internal(ast.get_child('substatement'))
     
     def eval_internal_ExpressionArithmeticAddition(self, ast):
         total = 0
@@ -55,7 +80,7 @@ class WState:
         total = self.eval_internal(children[0])
         for c in children[1:]:
             total -= self.eval_internal(c)
-        return total    
+        return total
     
     def eval_internal_Number(self, ast):
         return int(ast.get_value())
@@ -67,3 +92,13 @@ class WState:
         left = self.eval_internal(ast.get_child('left'))
         right = self.eval_internal(ast.get_child('right'))
         return left > right
+    
+    def eval_internal_ExpressionBooleanEquals(self, ast):
+        left = self.eval_internal(ast.get_child('left'))
+        right = self.eval_internal(ast.get_child('right'))
+        return left == right    
+    
+    def eval_internal_StatementAssignment(self, ast):
+        assignee = ast.get_child('assignee').get_value()
+        assigner = self.eval_internal(ast.get_child('assigner'))
+        self.set(assignee, assigner)

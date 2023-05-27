@@ -8,6 +8,8 @@ from WAst import WAst
 sys.path.insert(0, '../functions')
 from Var import Var
 from AExp import AExp
+from flow import flow
+
 
 SHOW = True
 

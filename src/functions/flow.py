@@ -8,7 +8,6 @@ from WParserTypes import StatementIfThenElseFi
 from WParserTypes import StatementSkip
 from WParserTypes import ExpressionBooleanEquals
 
-from add_labels import add_labels
 from init import init
 from final import final
 

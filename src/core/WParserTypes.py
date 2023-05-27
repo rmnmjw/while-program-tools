@@ -15,6 +15,9 @@ class Statement(WParserBaseType):
         super().__init__(tokens, self.__class__.__name__)
         self.set_child('substatement', self.parse(tokens))
     
+    def to_code(self, show_labels=True):
+        return self.get_child('substatement').to_code(show_labels=show_labels)
+    
     def parse(self, tokens):
         # sequential
         depth = 0
@@ -26,6 +29,9 @@ class Statement(WParserBaseType):
                 depth -= 1
             if depth == 0 and token == ';':
                 is_sequential = True
+        
+        if tokens[-1] == ';':
+            raise Exception('Statement: Illegal symbol! Code ends with ";" without any more statements.')
         
         if is_sequential:
             return StatementSequential(tokens)
@@ -74,6 +80,8 @@ class Statement(WParserBaseType):
         
         raise Exception(" - *** NOT IMPLEMENTED *** - [ " + " ".join(tokens) + " ]")
 
+
+
 class TruthValue(WParserBaseType):
     pass
 
@@ -85,7 +93,7 @@ class Variable(WParserBaseType):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
-    def to_code(self):
+    def to_code(self, show_labels=True):
         return self.get_value()
     
 class Number(WParserBaseType):
@@ -94,7 +102,7 @@ class Number(WParserBaseType):
         super().__init__(tokens, self.__class__.__name__)
         self.set_value(self.tokens[0])
     
-    def to_code(self):
+    def to_code(self, show_labels=True):
         return self.get_value()
     
 class ExpressionArithmeticSubstraction(WParserBaseType):
@@ -114,9 +122,9 @@ class ExpressionArithmeticSubstraction(WParserBaseType):
         
         raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
     
-    def to_code(self):
-        m = self.get_child("minuend").to_code()
-        s = self.get_child("subtrahend").to_code()
+    def to_code(self, show_labels=True):
+        m = self.get_child("minuend").to_code(show_labels=show_labels)
+        s = self.get_child("subtrahend").to_code(show_labels=show_labels)
         return f'{m} + {s}'
     
 class ExpressionArithmeticAddition(WParserBaseType):
@@ -136,9 +144,9 @@ class ExpressionArithmeticAddition(WParserBaseType):
         
         raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
     
-    def to_code(self):
-        s0 = self.get_child("summand0").to_code()
-        s1 = self.get_child("summand1").to_code()
+    def to_code(self, show_labels=True):
+        s0 = self.get_child("summand0").to_code(show_labels=show_labels)
+        s1 = self.get_child("summand1").to_code(show_labels=show_labels)
         return f'{s0} + {s1}'
 
 class ExpressionArithmetic(WParserBaseType):
@@ -205,10 +213,10 @@ class ExpressionBooleanGreaterThan(WParserBaseType):
             return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
     
-    def to_code(self):
-        result = f'{self.get_child("left").to_code()} > {self.get_child("right").to_code()}'
+    def to_code(self, show_labels=True):
+        result = f'{self.get_child("left").to_code(show_labels=show_labels)} > {self.get_child("right").to_code(show_labels=show_labels)}'
         label = self.get_label()
-        if label != None:
+        if label != None and show_labels:
             result = f'[{result}]^{label}'
         return result
 
@@ -230,12 +238,12 @@ class ExpressionBooleanEquals(WParserBaseType):
             return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
 
-    def to_code(self):
-        l = self.get_child('left').to_code()
-        r = self.get_child('right').to_code()
+    def to_code(self, show_labels=True):
+        l = self.get_child('left').to_code(show_labels=show_labels)
+        r = self.get_child('right').to_code(show_labels=show_labels)
         result = f'{l} = {r}'
         label = self.get_label()
-        if label != None:
+        if label != None and show_labels:
             result = f'[{result}]^{label}'
         return result
 
@@ -274,13 +282,13 @@ class StatementAssignment(WParserBaseType):
         assigner = ExpressionArithmetic(tokens[2:])
         return [assignee, assigner]
     
-    def to_code(self):
-        ee = self.get_child("assignee").to_code()
-        er = self.get_child("assigner").to_code()
+    def to_code(self, show_labels=True):
+        ee = self.get_child("assignee").to_code(show_labels=show_labels)
+        er = self.get_child("assigner").to_code(show_labels=show_labels)
         label = self.get_label()
         ci = self.indent_code()
         result = f'{ee} := {er}'
-        if label != None:
+        if label != None and show_labels:
             result = f'{ci}[{result}]^{label}'
         return result
 
@@ -355,19 +363,20 @@ class StatementIfThenElseFi(WParserBaseType):
         part_else = Statement([el for el in part_else if el != ''])
         return [part_condition, part_then, part_else]
     
-    def to_code(self):
-        c = self.get_child('condition').to_code()
-        t = self.get_child('statementTrue').to_code()
-        f = self.get_child('statementFalse').to_code()
+    def to_code(self, show_labels=True):
+        c = self.get_child('condition').to_code(show_labels=show_labels)
+        t = self.get_child('statementTrue').to_code(show_labels=show_labels)
+        f = self.get_child('statementFalse').to_code(show_labels=show_labels)
         ci = self.indent_code()
         result = f'{ci}if {c} then\n{t}\n{ci}else\n{f}\n{ci}fi'
         return result
 
 class StatementSequential(WParserBaseType):
     
-    def __init__(self, tokens):
+    def __init__(self, tokens=None):
         super().__init__(tokens, self.__class__.__name__)
-        self.set_children(self.parse(tokens))
+        if tokens != None:
+            self.set_children(self.parse(tokens))
     
     def parse(self, tokens):
         depth = 0
@@ -387,9 +396,10 @@ class StatementSequential(WParserBaseType):
         if len(current) != 0:
             parts.append(current)
         
-        if len(parts) == 1:
-            parts = [Statement(p[0])]
-            return parts
+        if len(parts) <= 1:
+            raise Exception('StatementSequential: Cannot be less than 2 parts.')
+            # parts = [Statement(parts[0])]
+            # return parts
         else:
             left = parts[0:math.floor(len(parts)/2)] 
             left = [token for upper in left for token in upper]
@@ -411,9 +421,9 @@ class StatementSequential(WParserBaseType):
         
         return parts
     
-    def to_code(self):
+    def to_code(self, show_labels=True):
         result = ""
-        result = ';\n'.join([c.to_code() for c in self.get_children()])
+        result = ';\n'.join([c.to_code(show_labels=show_labels) for c in self.get_children()])
         return result
     
    
@@ -457,12 +467,12 @@ class StatementWhileDoOd(WParserBaseType):
         
         return [part_condition, part_body]
     
-    def to_code(self):
+    def to_code(self, show_labels=True):
         c = self.get_child("condition")
         label = c.get_label()
         ci = self.indent_code()
-        result  = f'{ci}while {c.to_code()} do'
-        result += f'\n{self.get_child("body").to_code()}\n{ci}od'
+        result  = f'{ci}while {c.to_code(show_labels=show_labels)} do'
+        result += f'\n{self.get_child("body").to_code(show_labels=show_labels)}\n{ci}od'
         return result
 
 class StatementSkip(WParserBaseType):
@@ -470,8 +480,8 @@ class StatementSkip(WParserBaseType):
     def __init__(self, tokens):
         super().__init__(tokens, self.__class__.__name__)
     
-    def to_code(self):
+    def to_code(self, show_labels=True):
         label = self.get_label()
-        if label != None:
+        if label != None and show_labels:
             return f'{self.indent_code()}[skip]^{label}'
         return 'skip'

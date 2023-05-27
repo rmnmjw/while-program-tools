@@ -47,8 +47,8 @@ for i, expr in enumerate(expressions):
 
 # # # # # # # # # # # # # #  b)
 print('\n\nb)', flush=True, end='\n\n')
-print('Var(S) =', Var(S), flush=True, end='\n')
-print('AExp(S) =', AExp(S), flush=True, end='\n')
+print('Var(S) =', {v.to_code() for v in Var(S)}, flush=True, end='\n')
+print('AExp(S) =', {e.to_code() for e in AExp(S)}, flush=True, end='\n')
 
 # # # # # # # # # # # # # #  c)
 print('\n\nc)', flush=True, end='\n\n')

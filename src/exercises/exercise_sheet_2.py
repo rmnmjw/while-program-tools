@@ -10,6 +10,7 @@ from AExp import AExp
 from flow import flow
 from blocks import blocks
 from state_printing import to_spaced_block, merge_lines
+# from kill_gen_AE import kill_LV
 
 # # # # # # # # # # # # # # EXERCISE 1 # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # EXERCISE 1 # # # # # # # # # # # # # #
@@ -34,6 +35,19 @@ S = WParser().parse(S)
 print('EXERCISE 1 (Live variable analysis):', flush=True, end='\n')
 
 
-print('\n\na)', flush=True, end='\n\n')
+print('\n\na)', flush=True, end='\n')
 
-print(Var(S), flush=True, end='\n')
+vs = {v.to_code() for v in Var(S)}
+print('\tVar_* = {vs}', flush=True, end='\n\n')
+
+
+print('\nb)', flush=True, end='\n')
+
+print('###########################################################', flush=True, end='\n')
+
+
+result = []
+for b in blocks(S):
+    print(b, flush=True, end='\n')
+    exit()
+print(blks, flush=True, end='\n')

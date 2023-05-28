@@ -5,6 +5,7 @@ JUST_CONTINUE = [
     , 'StatementAssignment'
     , 'ExpressionArithmeticSubstraction'
     , 'ExpressionArithmeticAddition'
+    , 'ExpressionArithmeticMultiplication'
     , 'ExpressionBooleanGreaterThan'
     , 'ExpressionBooleanEquals'
 ]

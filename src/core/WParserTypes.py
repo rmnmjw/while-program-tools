@@ -31,7 +31,8 @@ class Statement(WParserBaseType):
                 is_sequential = True
         
         if tokens[-1] == ';':
-            raise Exception('Statement: Illegal symbol! Code ends with ";" without any more statements.')
+            print('Warning: Semicolon used without actually being a sequential code.', flush=True, end='\n')
+            tokens = tokens[:-1]
         
         if is_sequential:
             return StatementSequential(tokens)
@@ -156,6 +157,26 @@ class ExpressionArithmeticAddition(WParserBaseType):
         s1 = self.get_child("summand1").to_code(show_labels=show_labels)
         return f'{s0} + {s1}'
 
+class ExpressionArithmeticMultiplication(WParserBaseType):
+    
+    def __init__(self, tokens):
+        super().__init__(tokens, self.__class__.__name__)
+        [factor0, factor1] = self.parse(tokens)
+        self.set_child('factor0', factor0)
+        self.set_child('factor1', factor1)
+    
+    def parse(self, tokens):
+        if len(tokens) == 3 and tokens[1] == '*':
+            factor0 = ExpressionArithmetic(tokens[0])
+            factor1 = ExpressionArithmetic(tokens[2])
+            return [factor0, factor1]
+        raise Exception(f"[{self.__class__.__name__}] NOT IMPLEMENTED YET {tokens}")
+    
+    def to_code(self, show_labels=True):
+        s0 = self.get_child("factor0").to_code(show_labels=show_labels)
+        s1 = self.get_child("factor1").to_code(show_labels=show_labels)
+        return f'{s0} * {s1}'
+
 class ExpressionArithmetic(WParserBaseType):
     
     def __init__(self, tokens):
@@ -177,6 +198,8 @@ class ExpressionArithmetic(WParserBaseType):
             return ExpressionArithmeticSubstraction(tokens)
         if len(tokens) == 3 and tokens[1] == '+':
             return ExpressionArithmeticAddition(tokens)
+        if len(tokens) == 3 and tokens[1] == '*':
+            return ExpressionArithmeticMultiplication(tokens)
         if len(tokens) == 5 and tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-', '*'] and tokens[3] not in KEYWORDS and tokens[4] == ')':
             return self.parse_single_assignment(tokens[1:4])
         raise Exception(f"NOT IMPLEMENTED YET {tokens}")
@@ -214,10 +237,16 @@ class ExpressionBooleanGreaterThan(WParserBaseType):
             left = ExpressionArithmetic(tokens[0])
             right = ExpressionArithmetic(tokens[2])
             return [left, right]
-        if len(tokens) == 7 and tokens[0] not in KEYWORDS and tokens[1] == '>' and tokens[2] == '(' and tokens[3] not in KEYWORDS and tokens[4] in ['+', '-', '*'] and tokens[5] not in KEYWORDS and tokens[6] == ')':
-            left = ExpressionArithmetic(tokens[0])
-            right = ExpressionArithmetic(tokens[2:7])
-            return [left, right]
+        if len(tokens) == 7:
+            if tokens[0] not in KEYWORDS and tokens[1] == '>' and tokens[2] == '(' and tokens[3] not in KEYWORDS and tokens[4] in ['+', '-', '*'] and tokens[5] not in KEYWORDS and tokens[6] == ')':
+                left = ExpressionArithmetic(tokens[0])
+                right = ExpressionArithmetic(tokens[2:7])
+                return [left, right]
+        if len(tokens) == 5:
+            if tokens[0] not in KEYWORDS and tokens[1] == '>' and tokens[2] not in KEYWORDS and tokens[3] in ['+', '-', '*'] and tokens[4] not in KEYWORDS:
+                left = ExpressionArithmetic(tokens[0])
+                right = ExpressionArithmetic(tokens[2:7])
+                return [left, right]
         raise Exception(f"[{self.__class__.__name__}] Not implemented yet. Tokens: {self.tokens}")
     
     def to_code(self, show_labels=True):
@@ -267,11 +296,13 @@ class ExpressionBoolean(WParserBaseType):
             return ExpressionBooleanGreaterThan(tokens)
         if len(tokens) == 3 and tokens[1] == "=":
             return ExpressionBooleanEquals(tokens)
+        if len(tokens) == 5:
+            if tokens[0] not in KEYWORDS and tokens[1] == '>' and tokens[2] not in KEYWORDS and tokens[3] in ['+', '-', '*'] and tokens[4] not in KEYWORDS:
+                return ExpressionBooleanGreaterThan(tokens)
         if len(tokens) == 7:
             if tokens[0] == '(' and tokens[1] not in KEYWORDS and tokens[2] in ['+', '-'] and tokens[3] not in KEYWORDS and tokens[4] == ')' and tokens[5] == '<' and tokens[6] not in KEYWORDS:
                 tokens = tokens[6:7] + ['>'] + tokens[0:5]
                 return ExpressionBooleanGreaterThan(tokens)
-        
         raise Exception("Not implemented yet")
 
 class StatementAssignment(WParserBaseType):

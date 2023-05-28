@@ -1,12 +1,21 @@
 import collections
 
 class OrderedSet(collections.OrderedDict):
-    def __init__(self, collection=None):
+    def __init__(self, collection=None, no_quotes=False):
         super().__init__()
         if collection != None:
             self.update(collection)
+        self.no_quotes = no_quotes
     
     def __repr__(self):
+        if self.no_quotes:
+            result = '{'
+            for i, k in enumerate(self.keys()):
+                result += str(k)
+                if i != len(self.keys()) - 1:
+                    result += ', '
+            return result + '}'
+        
         return '{' + str(list(self.keys()))[1:-1] + '}'
     
     def __getitem__(self, key):

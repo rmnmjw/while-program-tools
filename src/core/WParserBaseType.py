@@ -114,7 +114,7 @@ class WParserBaseTypeInternal:
     def __repr__(self):
         result = ''
         if self.label != None:
-            result += self.indent() + f"[<<{self.type}>>] {self.label}"
+            result += self.indent() + f"[<<{self.type}>>]^{self.label}"
         else:
             result += self.indent() + f"<<{self.type}>>"
         if self.get_value() != None:

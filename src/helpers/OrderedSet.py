@@ -9,6 +9,9 @@ class OrderedSet(collections.OrderedDict):
     def __repr__(self):
         return '{' + str(list(self.keys()))[1:-1] + '}'
     
+    def __getitem__(self, key):
+        return list(self.keys())[key]
+    
     def __sort(self):
         items = list(self)
         items.sort()

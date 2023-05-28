@@ -96,6 +96,13 @@ class Variable(WParserBaseType):
     def to_code(self, show_labels=True):
         return self.get_value()
     
+    def __eq__(self, other):
+        if other == None: return False
+        return self.get_value() == other.get_value()
+    
+    def __hash__(self):
+        return hash(self.get_value())
+    
 class Number(WParserBaseType):
     
     def __init__(self, tokens):

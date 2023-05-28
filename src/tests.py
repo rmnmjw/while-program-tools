@@ -1,11 +1,13 @@
 import os, sys, pathlib
 for p in ['core', 'helpers', 'functions']: sys.path.insert(1, f'{os.path.join(pathlib.Path(__file__).parent.resolve(), p)}')
 
-from WParser import WParser
-from WState import WState
-from WDerivator import WDerivator
-
+from blocks import blocks
 from flow import flow
+from kill_gen_AE import kill_AE, gen_AE
+from WDerivator import WDerivator
+from WParser import WParser
+from WParserTypes import Variable
+from WState import WState
 
 def test(code, result=None):
     # state for eval: start
@@ -54,3 +56,53 @@ od;
 [output := b]^8;
 [skip]^9"""
 assert result == S.to_code()
+
+
+
+
+
+#
+#
+# kill_AE
+#
+#
+
+
+# test kill_AE(skip)
+S = WParser().parse('skip')
+b = blocks(S)[0]
+k = kill_AE(S, b)
+assert k == set()
+
+
+# test kill_AE([x:=expr]^l)
+S = WParser().parse('a:=1+1;b:=a+a')
+b = blocks(S)[0]
+k = kill_AE(S, b)
+assert k[0].to_code() == 'a + a'
+
+# test kill_AE([b]^l)
+S = WParser().parse('if 2 = 1 then skip else skip fi')
+b = blocks(S)[0]
+assert kill_AE(S, b) == set()
+
+
+# test gen_AE(skip)
+S = WParser().parse('skip')
+b = blocks(S)[0]
+k = gen_AE(S, b)
+assert k == set()
+
+# test gen_AE([x:=expr]^l)
+S = WParser().parse('a:=1+1')
+bb = blocks(S)
+assert [g.to_code() for g in gen_AE(S, bb[0])][0] == '1 + 1'
+
+S = WParser().parse('a:=a+1')
+bb = blocks(S)
+assert [g.to_code() for g in gen_AE(S, bb[0])] == []
+
+# test gen_AE([b]^l)
+S = WParser().parse('if 2 = 1 then skip else skip fi')
+b = blocks(S)[0]
+assert gen_AE(S, b) == set()

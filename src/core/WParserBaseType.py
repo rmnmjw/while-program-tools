@@ -1,3 +1,5 @@
+from OrderedSet import OrderedSet
+
 class WParserBaseTypeInternal:
         
     def __init__(self, tokens, type):
@@ -174,4 +176,23 @@ class WParserBaseType(WParserBaseTypeInternal):
                     parent.pull_up(self.get_function(), remaining[0].get_function())
                     return
         raise Exception(f'WParserBaseType.remove_child(): class "{clazz}" is not handled.')
+    
+    def blocks(self, label=None):
+        blks = OrderedSet()
+        if self.get_label() != None:
+            blks.add(self)
+        for c in self.get_children():
+            blks.update(c.blocks())
+        if label == None:
+            return blks
+        for i in blks.keys():
+            if i.get_label() == label:
+                return i
+        return None
+
+    
+    def phi_LV(self, l, A):
+        blks = blocks(self)
+        tmp = A - set(kill_AE(self, blks(l)))
+        return tmp | gen_AE(self, blks(l))
     
